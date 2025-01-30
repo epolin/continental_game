@@ -4,10 +4,9 @@ import './App.css';
 function App() {
   const [players, setPlayers] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState('');
-  const [showMenu, setShowMenu] = useState(true);
-  const [showPlayerForm, setShowPlayerForm] = useState(false);
-  const [chips, setChips] = useState([]);
   const [scores, setScores] = useState([]);
+  const [chips, setChips] = useState([]);
+  const [currentSection, setCurrentSection] = useState('menu'); // Controla la sección activa
 
   // Función para agregar jugadores
   const addPlayer = () => {
@@ -18,20 +17,20 @@ function App() {
 
   // Función para enviar puntajes
   const submitScores = () => {
-    const playerScores = players.map((player) => ({
+    const playerScores = players.map((player, index) => ({
       name: player,
-      score: parseInt(prompt(`Ingresa puntos para ${player}:`), 10),
+      score: parseInt(scores[index], 10) || 0,
     }));
-    setScores(playerScores);
+    alert('Resultados enviados:\n' + JSON.stringify(playerScores, null, 2));
   };
 
   // Función para gestionar fichas
-  const manageChips = () => {
-    const playerChips = players.map((player) => ({
+  const submitChips = () => {
+    const playerChips = players.map((player, index) => ({
       name: player,
-      chips: parseInt(prompt(`Ingresa fichas compradas por ${player}:`), 10),
+      chips: parseInt(chips[index], 10) || 0,
     }));
-    setChips(playerChips);
+    alert('Fichas guardadas:\n' + JSON.stringify(playerChips, null, 2));
   };
 
   return (
@@ -39,25 +38,26 @@ function App() {
       {/* Encabezado */}
       <header>
         <h1>Torneo Continental</h1>
-        <button onClick={() => setShowMenu(!showMenu)}>☰ Menú</button>
+        <button onClick={() => setCurrentSection('menu')}>☰ Menú</button>
       </header>
 
-      {/* Menú */}
-      {showMenu && (
+      {/* Menú Principal */}
+      {currentSection === 'menu' && (
         <nav>
           <ul>
+            <li><button onClick={() => setCurrentSection('add-players')}>Registro de Jugadores</button></li>
+            <li><button onClick={() => setCurrentSection('submit-scores')}>Enviar Resultados</button></li>
+            <li><button onClick={() => setCurrentSection('manage-chips')}>Gestión de Fichas</button></li>
             <li><button onClick={() => alert('Continuar Torneo')}>Continuar Torneo</button></li>
             <li><button onClick={() => alert('Partida Nueva')}>Partida Nueva</button></li>
-            <li><button onClick={manageChips}>Gestionar Fichas</button></li>
-            <li><button onClick={() => setShowPlayerForm(true)}>Registro de Jugadores</button></li>
           </ul>
         </nav>
       )}
 
-      {/* Formulario para Agregar Jugadores */}
-      {showPlayerForm && (
-        <div>
-          <h2>Agregar Jugador</h2>
+      {/* Registro de Jugadores */}
+      {currentSection === 'add-players' && (
+        <section>
+          <h2>Registro de Jugadores</h2>
           <input
             type="text"
             value={currentPlayer}
@@ -65,63 +65,86 @@ function App() {
             placeholder="Nombre del jugador"
           />
           <button onClick={addPlayer}>Agregar Jugador</button>
-          <button onClick={() => setShowPlayerForm(false)}>Cancelar</button>
-        </div>
+          <ul>
+            {players.map((player, index) => (
+              <li key={index}>{player}</li>
+            ))}
+          </ul>
+          <button onClick={() => setCurrentSection('menu')}>Regresar al Menú</button>
+        </section>
       )}
 
-      {/* Lista de Jugadores */}
-      <section>
-        <h2>Registro de Jugadores</h2>
-        <ul>
-          {players.map((player, index) => (
-            <li key={index}>{player}</li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Resultados de Puntos */}
-      <section>
-        <h2>Resultados de la Partida Actual</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Jugador</th>
-              <th>Puntos</th>
-            </tr>
-          </thead>
-          <tbody>
-            {scores.map((score, index) => (
-              <tr key={index}>
-                <td>{score.name}</td>
-                <td>{score.score}</td>
+      {/* Enviar Resultados */}
+      {currentSection === 'submit-scores' && (
+        <section>
+          <h2>Resultados de la Partida Actual</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Jugador</th>
+                <th>Puntos</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        <button onClick={submitScores}>Enviar Resultados</button>
-      </section>
+            </thead>
+            <tbody>
+              {players.map((player, index) => (
+                <tr key={index}>
+                  <td>{player}</td>
+                  <td>
+                    <input
+                      type="number"
+                      value={scores[index] || ''}
+                      onChange={(e) => {
+                        const newScores = [...scores];
+                        newScores[index] = e.target.value;
+                        setScores(newScores);
+                      }}
+                      placeholder="Puntos"
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <button onClick={submitScores}>Enviar Resultados</button>
+          <button onClick={() => setCurrentSection('menu')}>Regresar al Menú</button>
+        </section>
+      )}
 
       {/* Gestión de Fichas */}
-      <section>
-        <h2>Gestión de Fichas</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Jugador</th>
-              <th>Fichas Compradas</th>
-            </tr>
-          </thead>
-          <tbody>
-            {chips.map((chip, index) => (
-              <tr key={index}>
-                <td>{chip.name}</td>
-                <td>{chip.chips}</td>
+      {currentSection === 'manage-chips' && (
+        <section>
+          <h2>Gestión de Fichas</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Jugador</th>
+                <th>Fichas Compradas</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        <button onClick={manageChips}>Guardar Cambios</button>
-      </section>
+            </thead>
+            <tbody>
+              {players.map((player, index) => (
+                <tr key={index}>
+                  <td>{player}</td>
+                  <td>
+                    <input
+                      type="number"
+                      value={chips[index] || ''}
+                      onChange={(e) => {
+                        const newChips = [...chips];
+                        newChips[index] = e.target.value;
+                        setChips(newChips);
+                      }}
+                      placeholder="Fichas"
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <button onClick={submitChips}>Guardar Cambios</button>
+          <button onClick={() => setCurrentSection('menu')}>Regresar al Menú</button>
+        </section>
+      )}
     </div>
   );
 }
