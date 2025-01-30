@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/continental_game/static/css/main.7795b21d.css",
-    "main.js": "/continental_game/static/js/main.2809e663.js",
+    "main.css": "/continental_game/static/css/main.dd5ad669.css",
+    "main.js": "/continental_game/static/js/main.1b1bf055.js",
     "index.html": "/continental_game/index.html",
-    "main.7795b21d.css.map": "/continental_game/static/css/main.7795b21d.css.map",
-    "main.2809e663.js.map": "/continental_game/static/js/main.2809e663.js.map"
+    "main.dd5ad669.css.map": "/continental_game/static/css/main.dd5ad669.css.map",
+    "main.1b1bf055.js.map": "/continental_game/static/js/main.1b1bf055.js.map"
   },
   "entrypoints": [
-    "static/css/main.7795b21d.css",
-    "static/js/main.2809e663.js"
+    "static/css/main.dd5ad669.css",
+    "static/js/main.1b1bf055.js"
   ]
 }
