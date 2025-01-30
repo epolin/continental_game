@@ -4,10 +4,11 @@ import './App.css';
 function App() {
   const [players, setPlayers] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState('');
-  const [scores, setScores] = useState([]);
-  const [chips, setChips] = useState([]);
+  const [rounds, setRounds] = useState([]); // Guarda los resultados de todas las partidas
+  const [chipsHistory, setChipsHistory] = useState([]); // Guarda el historial de fichas
   const [currentSection, setCurrentSection] = useState('menu');
   const [currentRound, setCurrentRound] = useState(1); // Controla la ronda actual
+  const [error, setError] = useState(''); // Mensajes de error
 
   // Función para agregar jugadores
   const addPlayer = () => {
@@ -18,26 +19,66 @@ function App() {
 
   // Función para iniciar la partida
   const startGame = () => {
-    setCurrentSection('submit-scores'); // Avanza al flujo de registro de puntajes
+    setCurrentSection('submit-scores');
+    initializeScores(); // Inicializa los puntajes para la primera partida
+  };
+
+  // Función para inicializar puntajes
+  const initializeScores = () => {
+    const initialScores = players.map(() => 0);
+    setRounds([{ scores: initialScores }]);
+    setChipsHistory([{ chips: players.map(() => 0) }]);
+  };
+
+  // Función para validar los puntajes
+  const validateScores = (scores) => {
+    const zeroCount = scores.filter((score) => score === 0).length;
+
+    // Solo puede haber un ganador (un jugador con 0 puntos)
+    if (zeroCount !== 1) {
+      setError('Error: Debe haber exactamente un ganador (0 puntos) en esta partida.');
+      return false;
+    }
+
+    // Validar que todos los puntajes sean divisibles entre 5
+    for (const score of scores) {
+      if (score % 5 !== 0) {
+        setError(`Error: El puntaje ${score} no es válido. Los puntos deben ser divisibles entre 5.`);
+        return false;
+      }
+    }
+
+    setError(''); // Limpiar errores si todo está bien
+    return true;
   };
 
   // Función para enviar puntajes
   const submitScores = () => {
-    const playerScores = players.map((player, index) => ({
-      name: player,
-      score: parseInt(scores[index], 10) || 0,
-    }));
-    alert('Resultados enviados:\n' + JSON.stringify(playerScores, null, 2));
-    setCurrentRound(currentRound + 1); // Avanza a la siguiente ronda
+    const currentScores = rounds[currentRound - 1]?.scores || [];
+
+    // Validar los puntajes
+    if (!validateScores(currentScores)) return;
+
+    // Avanzar a la siguiente partida o mostrar resultados finales
+    const updatedRounds = [...rounds];
+    updatedRounds[currentRound - 1] = { scores: currentScores };
+
+    if (currentRound < 8) {
+      setCurrentRound(currentRound + 1);
+      updatedRounds.push({ scores: players.map(() => 0) }); // Inicializa puntajes para la siguiente partida
+      setRounds(updatedRounds);
+      setChipsHistory([...chipsHistory, { chips: players.map(() => 0) }]);
+    } else {
+      setCurrentSection('final-results');
+    }
   };
 
   // Función para gestionar fichas
   const submitChips = () => {
-    const playerChips = players.map((player, index) => ({
-      name: player,
-      chips: parseInt(chips[index], 10) || 0,
-    }));
-    alert('Fichas guardadas:\n' + JSON.stringify(playerChips, null, 2));
+    const currentChips = chipsHistory[currentRound - 1]?.chips || [];
+    const updatedChipsHistory = [...chipsHistory];
+    updatedChipsHistory[currentRound - 1] = { chips: currentChips };
+    setChipsHistory(updatedChipsHistory);
   };
 
   return (
@@ -47,6 +88,9 @@ function App() {
         <h1>Torneo Continental</h1>
         <button onClick={() => setCurrentSection('menu')}>☰ Menú</button>
       </header>
+
+      {/* Mensajes de Error */}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
 
       {/* Menú Principal */}
       {currentSection === 'menu' && (
@@ -79,7 +123,7 @@ function App() {
           </ul>
           {players.length > 0 && (
             <button className="start-game-button" onClick={startGame}>
-              Iniciar Partida
+              Comenzar Torneo
             </button>
           )}
           <button onClick={() => setCurrentSection('menu')}>Regresar al Menú</button>
@@ -106,11 +150,11 @@ function App() {
                   <td>
                     <input
                       type="number"
-                      value={scores[index] || ''}
+                      value={rounds[currentRound - 1]?.scores[index] || ''}
                       onChange={(e) => {
-                        const newScores = [...scores];
-                        newScores[index] = e.target.value;
-                        setScores(newScores);
+                        const updatedRounds = [...rounds];
+                        updatedRounds[currentRound - 1].scores[index] = parseInt(e.target.value, 10) || 0;
+                        setRounds(updatedRounds);
                       }}
                       placeholder="Puntos"
                     />
@@ -119,7 +163,9 @@ function App() {
               ))}
             </tbody>
           </table>
-          <button onClick={submitScores}>Enviar Resultados</button>
+          <button onClick={submitScores}>
+            {currentRound < 8 ? 'Siguiente Partida' : 'Finalizar Torneo'}
+          </button>
           <button onClick={() => setCurrentSection('menu')}>Regresar al Menú</button>
         </section>
       )}
@@ -142,11 +188,11 @@ function App() {
                   <td>
                     <input
                       type="number"
-                      value={chips[index] || ''}
+                      value={chipsHistory[currentRound - 1]?.chips[index] || ''}
                       onChange={(e) => {
-                        const newChips = [...chips];
-                        newChips[index] = e.target.value;
-                        setChips(newChips);
+                        const updatedChipsHistory = [...chipsHistory];
+                        updatedChipsHistory[currentRound - 1].chips[index] = parseInt(e.target.value, 10) || 0;
+                        setChipsHistory(updatedChipsHistory);
                       }}
                       placeholder="Fichas"
                     />
@@ -156,6 +202,30 @@ function App() {
             </tbody>
           </table>
           <button onClick={submitChips}>Guardar Cambios</button>
+          <button onClick={() => setCurrentSection('menu')}>Regresar al Menú</button>
+        </section>
+      )}
+
+      {/* Resultados Finales */}
+      {currentSection === 'final-results' && (
+        <section>
+          <h2>Resultados Finales</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Jugador</th>
+                <th>Puntuación Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {players.map((player, index) => (
+                <tr key={index}>
+                  <td>{player}</td>
+                  <td>{rounds.reduce((total, round) => total + (round.scores[index] || 0), 0)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
           <button onClick={() => setCurrentSection('menu')}>Regresar al Menú</button>
         </section>
       )}
