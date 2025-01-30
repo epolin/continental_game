@@ -11,7 +11,7 @@ function App() {
   // Registrar jugador
   const addPlayer = async () => {
     if (!currentPlayer || players.includes(currentPlayer)) return;
-    const response = await fetch('https://tu-backend.onrender.com/api/register', {
+    const response = await fetch('https://continental-game.onrender.com/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ playerName: currentPlayer }),
@@ -26,7 +26,7 @@ function App() {
   // Obtener jugadores desde el backend
   useEffect(() => {
     const fetchPlayers = async () => {
-      const response = await fetch('https://tu-backend.onrender.com/api/players');
+      const response = await fetch('https://continental-game.onrender.com/api/players');
       const data = await response.json();
       setPlayers(data.players);
     };
@@ -39,7 +39,7 @@ function App() {
       name: player,
       score: parseInt(prompt(`Ingresa puntos para ${player}:`), 10),
     }));
-    const response = await fetch('https://tu-backend.onrender.com/api/scores', {
+    const response = await fetch('https://continental-game.onrender.com/api/scores', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ playerScores }),
@@ -57,7 +57,7 @@ function App() {
       name: player,
       chips: parseInt(prompt(`Ingresa fichas compradas por ${player}:`), 10),
     }));
-    const response = await fetch('https://tu-backend.onrender.com/api/chips', {
+    const response = await fetch('https://continental-game.onrender.com/api/chips', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ playerChips }),
