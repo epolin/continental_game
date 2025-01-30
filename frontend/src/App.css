@@ -1,3 +1,4 @@
+/* Estilos Generales */
 body {
   font-family: Arial, sans-serif;
   text-align: center;
@@ -24,8 +25,10 @@ button {
   background-color: #4caf50;
   color: white;
   border: none;
+  border-radius: 20px; /* Botones redondeados */
   cursor: pointer;
   margin: 5px;
+  transition: background-color 0.3s ease;
 }
 
 button:hover {
@@ -50,6 +53,8 @@ input[type='number'] {
   padding: 8px;
   margin-right: 10px;
   width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 5px; /* Inputs redondeados */
 }
 
 table {
@@ -62,9 +67,23 @@ table th,
 table td {
   border: 1px solid #ddd;
   padding: 8px;
+  text-align: center;
 }
 
 table th {
   background-color: #333;
   color: white;
+}
+
+/* Estilo para el botón de "Iniciar Partida" */
+.start-game-button {
+  background-color: #ff9800;
+  padding: 15px 30px;
+  font-size: 18px;
+  border-radius: 25px; /* Más redondeado */
+  margin-top: 20px;
+}
+
+.start-game-button:hover {
+  background-color: #e68a00;
 }

@@ -6,13 +6,19 @@ function App() {
   const [currentPlayer, setCurrentPlayer] = useState('');
   const [scores, setScores] = useState([]);
   const [chips, setChips] = useState([]);
-  const [currentSection, setCurrentSection] = useState('menu'); // Controla la sección activa
+  const [currentSection, setCurrentSection] = useState('menu');
+  const [currentRound, setCurrentRound] = useState(1); // Controla la ronda actual
 
   // Función para agregar jugadores
   const addPlayer = () => {
     if (!currentPlayer || players.includes(currentPlayer)) return;
     setPlayers([...players, currentPlayer]);
     setCurrentPlayer('');
+  };
+
+  // Función para iniciar la partida
+  const startGame = () => {
+    setCurrentSection('submit-scores'); // Avanza al flujo de registro de puntajes
   };
 
   // Función para enviar puntajes
@@ -22,6 +28,7 @@ function App() {
       score: parseInt(scores[index], 10) || 0,
     }));
     alert('Resultados enviados:\n' + JSON.stringify(playerScores, null, 2));
+    setCurrentRound(currentRound + 1); // Avanza a la siguiente ronda
   };
 
   // Función para gestionar fichas
@@ -70,6 +77,11 @@ function App() {
               <li key={index}>{player}</li>
             ))}
           </ul>
+          {players.length > 0 && (
+            <button className="start-game-button" onClick={startGame}>
+              Iniciar Partida
+            </button>
+          )}
           <button onClick={() => setCurrentSection('menu')}>Regresar al Menú</button>
         </section>
       )}
@@ -77,7 +89,9 @@ function App() {
       {/* Enviar Resultados */}
       {currentSection === 'submit-scores' && (
         <section>
-          <h2>Resultados de la Partida Actual</h2>
+          <h2>Partida {currentRound}/8</h2>
+          <p>🏆 Líder: -</p>
+          <p>Objetivo: 2 tercias</p>
           <table>
             <thead>
               <tr>
