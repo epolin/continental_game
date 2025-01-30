@@ -1,109 +1,127 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './App.css';
-import './index.css';
 
 function App() {
   const [players, setPlayers] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState('');
-  const [scores, setScores] = useState([]);
+  const [showMenu, setShowMenu] = useState(true);
+  const [showPlayerForm, setShowPlayerForm] = useState(false);
   const [chips, setChips] = useState([]);
-  const [currentRound, setCurrentRound] = useState(1);
+  const [scores, setScores] = useState([]);
 
-  // Registrar jugador
-  const addPlayer = async () => {
+  // Función para agregar jugadores
+  const addPlayer = () => {
     if (!currentPlayer || players.includes(currentPlayer)) return;
-    const response = await fetch('https://continental-game.onrender.com/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerName: currentPlayer }),
-    });
-    const data = await response.json();
-    if (data.success) {
-      setPlayers(data.players);
-      setCurrentPlayer('');
-    }
+    setPlayers([...players, currentPlayer]);
+    setCurrentPlayer('');
   };
 
-  // Obtener jugadores desde el backend
-  useEffect(() => {
-    const fetchPlayers = async () => {
-      const response = await fetch('https://continental-game.onrender.com/api/players');
-      const data = await response.json();
-      setPlayers(data.players);
-    };
-    fetchPlayers();
-  }, []);
-
-  // Guardar puntajes
-  const submitScores = async () => {
+  // Función para enviar puntajes
+  const submitScores = () => {
     const playerScores = players.map((player) => ({
       name: player,
       score: parseInt(prompt(`Ingresa puntos para ${player}:`), 10),
     }));
-    const response = await fetch('https://continental-game.onrender.com/api/scores', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerScores }),
-    });
-    const data = await response.json();
-    if (data.success) {
-      setScores(data.scores);
-      setCurrentRound(currentRound + 1);
-    }
+    setScores(playerScores);
   };
 
-  // Gestionar fichas
-  const manageChips = async () => {
+  // Función para gestionar fichas
+  const manageChips = () => {
     const playerChips = players.map((player) => ({
       name: player,
       chips: parseInt(prompt(`Ingresa fichas compradas por ${player}:`), 10),
     }));
-    const response = await fetch('https://continental-game.onrender.com/api/chips', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerChips }),
-    });
-    const data = await response.json();
-    if (data.success) {
-      setChips(data.chipsHistory);
-    }
+    setChips(playerChips);
   };
 
   return (
     <div className="App">
-      <h1>Torneo Continental</h1>
-      <div>
-        <input
-          type="text"
-          value={currentPlayer}
-          onChange={(e) => setCurrentPlayer(e.target.value)}
-          placeholder="Nombre del jugador"
-        />
-        <button onClick={addPlayer}>Agregar Jugador</button>
-      </div>
-      <ul>
-        {players.map((player, index) => (
-          <li key={index}>{player}</li>
-        ))}
-      </ul>
-      <button onClick={submitScores}>Enviar Resultados</button>
-      <button onClick={manageChips}>Gestionar Fichas</button>
-      <h2>Puntajes</h2>
-      <ul>
-        {scores.map((score, index) => (
-          <li key={index}>
-            {score.name}: {score.score}
-          </li>
-        ))}
-      </ul>
-      <h2>Fichas Compradas</h2>
-      <ul>
-        {chips.map((chip, index) => (
-          <li key={index}>
-            {chip.name}: {chip.chips}
-          </li>
-        ))}
-      </ul>
+      {/* Encabezado */}
+      <header>
+        <h1>Torneo Continental</h1>
+        <button onClick={() => setShowMenu(!showMenu)}>☰ Menú</button>
+      </header>
+
+      {/* Menú */}
+      {showMenu && (
+        <nav>
+          <ul>
+            <li><button onClick={() => alert('Continuar Torneo')}>Continuar Torneo</button></li>
+            <li><button onClick={() => alert('Partida Nueva')}>Partida Nueva</button></li>
+            <li><button onClick={manageChips}>Gestionar Fichas</button></li>
+            <li><button onClick={() => setShowPlayerForm(true)}>Registro de Jugadores</button></li>
+          </ul>
+        </nav>
+      )}
+
+      {/* Formulario para Agregar Jugadores */}
+      {showPlayerForm && (
+        <div>
+          <h2>Agregar Jugador</h2>
+          <input
+            type="text"
+            value={currentPlayer}
+            onChange={(e) => setCurrentPlayer(e.target.value)}
+            placeholder="Nombre del jugador"
+          />
+          <button onClick={addPlayer}>Agregar Jugador</button>
+          <button onClick={() => setShowPlayerForm(false)}>Cancelar</button>
+        </div>
+      )}
+
+      {/* Lista de Jugadores */}
+      <section>
+        <h2>Registro de Jugadores</h2>
+        <ul>
+          {players.map((player, index) => (
+            <li key={index}>{player}</li>
+          ))}
+        </ul>
+      </section>
+
+      {/* Resultados de Puntos */}
+      <section>
+        <h2>Resultados de la Partida Actual</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Jugador</th>
+              <th>Puntos</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scores.map((score, index) => (
+              <tr key={index}>
+                <td>{score.name}</td>
+                <td>{score.score}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <button onClick={submitScores}>Enviar Resultados</button>
+      </section>
+
+      {/* Gestión de Fichas */}
+      <section>
+        <h2>Gestión de Fichas</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Jugador</th>
+              <th>Fichas Compradas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {chips.map((chip, index) => (
+              <tr key={index}>
+                <td>{chip.name}</td>
+                <td>{chip.chips}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <button onClick={manageChips}>Guardar Cambios</button>
+      </section>
     </div>
   );
 }
